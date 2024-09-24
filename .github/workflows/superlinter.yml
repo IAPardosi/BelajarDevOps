@@ -1,19 +1,26 @@
----
-# Contoh YAML file
-name: Super-Linter
+name: Syntax Check
 
-on: push
+on: [push, pull_request]
 
 jobs:
-  super-lint:
-    name: Lint code base
+  syntax-check:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Run Super-Linter
-        uses: github/super-linter@v4
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      # Step 1: Checkout code dari repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Setup Node.js environment (ganti sesuai kebutuhan)
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # Sesuaikan versi Node.js
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Lakukan linting untuk mengecek syntax error
+      - name: Run ESLint to check syntax
+        run: npm run lint
