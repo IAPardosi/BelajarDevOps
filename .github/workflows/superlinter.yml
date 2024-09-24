@@ -1,4 +1,5 @@
-name: Syntax Check
+
+name: Multi-Language Syntax Check
 
 on: [push, pull_request]
 
@@ -6,21 +7,60 @@ jobs:
   syntax-check:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        language: [python, javascript, java, html]
+
     steps:
-      # Step 1: Checkout code dari repository
+      # Step 1: Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Node.js (bisa diganti sesuai project)
+      # Step 2: Set up and run checks for Python
+      - name: Set up Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      
+      - name: Install Python dependencies
+        if: matrix.language == 'python'
+        run: |
+          pip install -r requirements.txt || true
+      
+      - name: Check Python syntax with flake8
+        if: matrix.language == 'python'
+        run: |
+          pip install flake8
+          flake8 .
+
+      # Step 3: Set up and run checks for JavaScript (Node.js)
       - name: Set up Node.js
+        if: matrix.language == 'javascript'
         uses: actions/setup-node@v2
         with:
           node-version: '14'
 
-      # Step 3: Install dependencies dengan opsi debug
-      - name: Install dependencies
-        run: npm install --verbose
+      - name: Install JavaScript dependencies
+        if: matrix.language == 'javascript'
+        run: |
+          npm install
+      
+      - name: Check JavaScript syntax with ESLint
+        if: matrix.language == 'javascript'
+        run: |
+          npx eslint .
 
-      # Step 4: Run ESLint untuk cek syntax (sesuaikan perintah lint sesuai project)
-      - name: Run ESLint to check syntax
-        run: npm run lint || exit 0  # Menambahkan exit code 0 jika lint error
+      # Step 4: Set up and run checks for Java
+      - name: Check Java syntax with javac
+        if: matrix.language == 'java'
+        run: |
+          find . -name "*.java" > sources.txt
+          javac @sources.txt
+
+      # Step 5: Set up and run checks for HTML
+      - name: Check HTML syntax with HTMLHint
+        if: matrix.language == 'html'
+        run: |
+          npm install -g htmlhint
+          htmlhint "**/*.html"
