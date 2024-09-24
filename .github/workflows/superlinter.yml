@@ -1,3 +1,5 @@
+---
+# Contoh YAML file
 name: Super-Linter
 
 on: push
